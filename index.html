@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Snake Game</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #222;
+      margin: 0;
+    }
+    canvas {
+      background: #111;
+      border: 2px solid #0f0;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game" width="400" height="400"></canvas>
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const grid = 20;
+    let snake = [{x: 160, y: 160}];
+    let direction = 'right';
+    let food = spawnFood();
+    let score = 0;
+
+    function spawnFood() {
+      return {
+        x: Math.floor(Math.random() * (canvas.width / grid)) * grid,
+        y: Math.floor(Math.random() * (canvas.height / grid)) * grid
+      };
+    }
+
+    function draw() {
+      ctx.fillStyle = '#111';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = 'lime';
+      snake.forEach(part => ctx.fillRect(part.x, part.y, grid-2, grid-2));
+
+      ctx.fillStyle = 'red';
+      ctx.fillRect(food.x, food.y, grid-2, grid-2);
+
+      const head = { ...snake[0] };
+      if (direction === 'right') head.x += grid;
+      if (direction === 'left') head.x -= grid;
+      if (direction === 'up') head.y -= grid;
+      if (direction === 'down') head.y += grid;
+
+      if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height ||
+          snake.some(part => part.x === head.x && part.y === head.y)) {
+        alert('Game Over! Score: ' + score);
+        document.location.reload();
+      }
+
+      snake.unshift(head);
+
+      if (head.x === food.x && head.y === food.y) {
+        score++;
+        food = spawnFood();
+      } else {
+        snake.pop();
+      }
+    }
+
+    function changeDirection(e) {
+      if (e.key === 'ArrowUp' && direction !== 'down') direction = 'up';
+      if (e.key === 'ArrowDown' && direction !== 'up') direction = 'down';
+      if (e.key === 'ArrowLeft' && direction !== 'right') direction = 'left';
+      if (e.key === 'ArrowRight' && direction !== 'left') direction = 'right';
+    }
+
+    document.addEventListener('keydown', changeDirection);
+    setInterval(draw, 100);
+  </script>
+</body>
+</html>
